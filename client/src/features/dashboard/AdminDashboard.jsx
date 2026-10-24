@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { FilterBar } from './FilterBar';
 import { Loader } from '../../components/shared/Loader';
+import { AiSummaryCard } from '../ai/AiSummaryCard';
 
 const GENDER_COLORS = ['#3b82f6', '#ec4899', '#a855f7'];
 
@@ -390,30 +391,8 @@ export function AdminDashboard() {
 
         {/* Right column: Announcements & AI Briefing */}
         <div className="space-y-6">
-          {/* AI Executive Briefing (Coming in Part 6) */}
-          <div className="rounded-xl border border-dashed border-primary/40 bg-gradient-to-br from-primary/5 via-card to-background p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <h2 className="text-sm font-semibold text-foreground">AI Executive Brief</h2>
-              </div>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                Coming in Part 6
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Autonomous organizational analysis: salary equity, headcount forecasting, budget burn rates, and compliance risks.
-            </p>
-            <button
-              disabled
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-muted text-muted-foreground px-4 py-2.5 text-xs font-medium cursor-not-allowed opacity-75"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              Generate Executive Briefing (Part 6)
-            </button>
-          </div>
+          {/* AI Executive Briefing */}
+          <AiSummaryCard role="admin" filters={filters} />
 
           {/* Announcements Card */}
           <div className="rounded-xl border border-border bg-card shadow-sm p-4 space-y-3">

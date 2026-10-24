@@ -15,6 +15,7 @@ const PayrollRun = require('./PayrollRun');
 const Payslip = require('./Payslip');
 const Notification = require('./Notification');
 const Announcement = require('./Announcement');
+const AiLog = require('./AiLog');
 
 module.exports = {
   User,
@@ -33,6 +34,7 @@ module.exports = {
   Payslip,
   Notification,
   Announcement,
+  AiLog,
 };
 
 

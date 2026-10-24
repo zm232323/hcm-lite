@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { FilterBar } from './FilterBar';
 import { Loader } from '../../components/shared/Loader';
+import { AiSummaryCard } from '../ai/AiSummaryCard';
 
 function getInitialFilters() {
   const now = new Date();
@@ -342,37 +343,8 @@ export function HrDashboard() {
           </div>
         </div>
 
-        {/* AI HR Summary Card (Coming in Part 6) */}
-        <div className="rounded-xl border border-dashed border-primary/40 bg-gradient-to-br from-primary/5 via-card to-background p-5 shadow-sm flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                  <Sparkles className="h-4 w-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground">AI HR Intelligence</h2>
-                  <p className="text-xs text-muted-foreground">Natural language insights & anomalies</p>
-                </div>
-              </div>
-              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold text-primary">
-                Coming in Part 6
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Ask questions about attendance patterns, identify teams with rising absenteeism, predict leave crunches, and summarize policy bottlenecks.
-            </p>
-          </div>
-          <div className="pt-4">
-            <button
-              disabled
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-muted text-muted-foreground px-4 py-2.5 text-xs font-medium cursor-not-allowed opacity-75"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              Generate HR Briefing (Part 6)
-            </button>
-          </div>
-        </div>
+        {/* AI HR Summary Card */}
+        <AiSummaryCard role="hr" filters={filters} />
       </div>
 
       {/* Bottom Grid: Top Late Comers & Announcements */}

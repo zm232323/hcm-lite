@@ -27,4 +27,7 @@ const validation = (message = 'Validation failed', fields) =>
 const businessRule = (message = 'Business rule violation') =>
   new HttpError(422, 'BUSINESS_RULE_VIOLATION', message);
 
-module.exports = { HttpError, unauthorized, forbidden, notFound, conflict, validation, businessRule };
+const rateLimited = (message = 'Rate limit exceeded', retryAfterMinutes) =>
+  new HttpError(429, 'RATE_LIMIT_EXCEEDED', message, retryAfterMinutes ? { retryAfterMinutes } : undefined);
+
+module.exports = { HttpError, unauthorized, forbidden, notFound, conflict, validation, businessRule, rateLimited };

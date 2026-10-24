@@ -17,6 +17,7 @@ export function EmployeeDashboard() {
   const [data, setData] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [askText, setAskText] = useState('');
 
   const fetchDashboard = async () => {
     try {
@@ -234,8 +235,8 @@ export function EmployeeDashboard() {
           </div>
         </div>
 
-        {/* AI Assistant Preview (Part 6) */}
-        <div className="rounded-xl border border-dashed border-primary/40 bg-gradient-to-br from-primary/5 via-card to-background p-5 shadow-sm flex flex-col justify-between space-y-3">
+        {/* AI Assistant Card */}
+        <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-background p-5 shadow-sm flex flex-col justify-between space-y-3">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -245,27 +246,41 @@ export function EmployeeDashboard() {
                 <h2 className="text-sm font-semibold text-foreground">Ask My Assistant</h2>
               </div>
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                Coming in Part 6
+                AI Assistant
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-              Ask about your leave eligibility, upcoming holidays, tax deductions, or company policies.
+              Ask about your remaining leave balance, company late rules, payslip details, or public holidays.
             </p>
           </div>
           <div className="pt-2">
-            <div className="flex items-center gap-2">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!askText.trim()) return;
+                window.dispatchEvent(
+                  new CustomEvent('open-ai-chat', { detail: { question: askText.trim() } })
+                );
+                setAskText('');
+              }}
+              className="flex items-center gap-2"
+            >
               <input
-                disabled
-                placeholder="Ask about leaves, payslips..."
-                className="w-full rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground cursor-not-allowed"
+                id="employee-ask-assistant-input"
+                type="text"
+                placeholder="e.g. How many sick leaves left?"
+                value={askText}
+                onChange={(e) => setAskText(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <button
-                disabled
-                className="rounded-lg bg-primary/50 px-3 py-2 text-xs font-medium text-primary-foreground cursor-not-allowed"
+                type="submit"
+                disabled={!askText.trim()}
+                className="rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
               >
                 Ask
               </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>

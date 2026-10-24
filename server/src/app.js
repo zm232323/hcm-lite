@@ -18,6 +18,8 @@ const payrollRoutes = require('./modules/payroll/routes');
 const notificationsRoutes = require('./modules/notifications/routes');
 const announcementsRoutes = require('./modules/announcements/routes');
 const dashboardRoutes = require('./modules/dashboards/routes');
+const aiRoutes = require('./modules/ai/routes');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -27,7 +29,10 @@ app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.get('/api/health', (req, res) => {
+  const isConnected = mongoose.connection.readyState === 1;
+  res.json({ ok: true, db: isConnected ? 'connected' : 'disconnected' });
+});
 
 // Routes
 app.use('/api/setup', setupRoutes);
@@ -43,6 +48,7 @@ app.use('/api/payroll', payrollRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/announcements', announcementsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 

@@ -29,7 +29,7 @@ const adminLinks = [
   { to: '/notifications', label: 'Notifications', icon: Bell },
   { divider: true, label: 'Admin' },
   { to: '/audit', label: 'Audit Log', icon: ClipboardList },
-  { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
+  { to: '/ai', label: 'AI Assistant', icon: Bot, isAi: true },
 ];
 
 const hrLinks = [
@@ -50,7 +50,7 @@ const hrLinks = [
   { divider: true, label: 'Communications' },
   { to: '/announcements', label: 'Announcements', icon: Megaphone },
   { to: '/notifications', label: 'Notifications', icon: Bell },
-  { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
+  { to: '/ai', label: 'AI Assistant', icon: Bot, isAi: true },
 ];
 
 const employeeLinks = [
@@ -61,9 +61,9 @@ const employeeLinks = [
   { to: '/leave/my', label: 'Leave', icon: FileText },
   { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
   { to: '/payroll/my', label: 'My payslips', icon: DollarSign },
-  { divider: true, label: 'Communications' },
   { to: '/announcements', label: 'Announcements', icon: Megaphone },
   { to: '/notifications', label: 'Notifications', icon: Bell },
+  { to: '/ai', label: 'AI Assistant', icon: Bot, isAi: true },
 ];
 
 
@@ -121,6 +121,25 @@ export function Sidebar({ open, onClose }) {
                     {link.label}
                   </p>
                 </div>
+              );
+            }
+            if (link.isAi) {
+              return (
+                <button
+                  key={link.to}
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    window.dispatchEvent(new CustomEvent('open-ai-chat'));
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+                >
+                  <link.icon className="h-4 w-4 shrink-0 text-primary" />
+                  <span>{link.label}</span>
+                  <span className="ml-auto text-[10px] font-semibold bg-primary/10 text-primary rounded px-1.5 py-0.5">
+                    AI
+                  </span>
+                </button>
               );
             }
             if (link.soon) {

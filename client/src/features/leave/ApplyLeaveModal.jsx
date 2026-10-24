@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CalendarPlus, AlertCircle, Info, Check } from 'lucide-react';
+import { X, CalendarPlus, AlertCircle, Info, Check, Sparkles } from 'lucide-react';
 import api from '../../lib/api';
 import { getErrorMessage, getFieldErrors } from '../../lib/utils';
 
@@ -14,6 +14,12 @@ export function ApplyLeaveModal({ open, balances = [], onClose, onSuccess }) {
   const [submitting, setSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // Smart leave state
+  const [smartText, setSmartText] = useState('');
+  const [smartLoading, setSmartLoading] = useState(false);
+  const [smartMessage, setSmartMessage] = useState(null);
+  const [smartSuccess, setSmartSuccess] = useState(false);
 
   useEffect(() => {
     if (balances.length > 0 && !leaveTypeId) {
@@ -66,6 +72,35 @@ export function ApplyLeaveModal({ open, balances = [], onClose, onSuccess }) {
     }
   };
 
+  const handleSmartLeave = async () => {
+    if (!smartText.trim() || smartLoading) return;
+    setSmartLoading(true);
+    setSmartMessage(null);
+    setSmartSuccess(false);
+
+    try {
+      const res = await api.post('/ai/smart-leave', { text: smartText.trim() });
+      if (res.data.ok && res.data.form) {
+        setLeaveTypeId(res.data.form.leaveTypeId);
+        setStartDate(res.data.form.start);
+        setEndDate(res.data.form.end);
+        setReason(res.data.form.reason);
+        setSmartSuccess(true);
+        setSmartMessage('Form pre-filled! Please review dates and confirm below.');
+      } else {
+        setSmartSuccess(false);
+        setSmartMessage(res.data.message || 'Could not understand. Please fill the form manually.');
+      }
+    } catch (err) {
+      setSmartSuccess(false);
+      setSmartMessage(
+        err.response?.data?.error?.message || 'Could not understand. Please fill the form manually.'
+      );
+    } finally {
+      setSmartLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -94,6 +129,53 @@ export function ApplyLeaveModal({ open, balances = [], onClose, onSuccess }) {
             <span>{generalError}</span>
           </div>
         )}
+
+        {/* Smart Leave Box */}
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-foreground flex items-center gap-1.5 text-xs">
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Describe your leave in words
+            </span>
+            <span className="text-[10px] text-primary font-medium bg-primary/10 rounded-full px-2 py-0.5">
+              Smart Fill
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="e.g. Next Monday and Tuesday off for sister's wedding / kal sick leave chahiye"
+              value={smartText}
+              onChange={(e) => setSmartText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSmartLeave();
+                }
+              }}
+              disabled={smartLoading}
+              className="flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button
+              type="button"
+              onClick={handleSmartLeave}
+              disabled={smartLoading || !smartText.trim()}
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm shrink-0"
+            >
+              {smartLoading ? 'Filling...' : 'Fill the form'}
+            </button>
+          </div>
+          {smartMessage && (
+            <p
+              className={`text-[11px] ${
+                smartSuccess
+                  ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                  : 'text-amber-600 dark:text-amber-400'
+              }`}
+            >
+              {smartMessage}
+            </p>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

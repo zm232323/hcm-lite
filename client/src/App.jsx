@@ -30,6 +30,7 @@ import PayrollRunsPage from './features/payroll/PayrollRunsPage';
 import MyPayslipsPage from './features/payroll/MyPayslipsPage';
 import AnnouncementsPage from './features/announcements/AnnouncementsPage';
 import NotificationsPage from './features/notifications/NotificationsPage';
+import { FloatingAssistant } from './features/ai/FloatingAssistant';
 
 import api from './lib/api';
 
@@ -53,6 +54,7 @@ function AppShell({ children }) {
           {children}
         </main>
       </div>
+      <FloatingAssistant />
     </div>
   );
 }
