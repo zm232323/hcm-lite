@@ -503,6 +503,30 @@ async function importEmployeesCsv(records, { dryRun = false }, actor) {
   };
 }
 
+/**
+ * Update basic salary for an employee and write audit log (Part 4 allowed addition).
+ */
+async function updateBasicSalary(employeeId, basic, actor) {
+  const employee = await Employee.findById(employeeId);
+  if (!employee) {
+    throw notFound('Employee not found');
+  }
+  const before = { basicSalary: employee.basicSalary };
+  employee.basicSalary = Number(basic);
+  await employee.save();
+
+  await logAction({
+    actor,
+    action: 'UPDATE_BASIC_SALARY',
+    entity: 'Employee',
+    entityId: employee._id,
+    before,
+    after: { basicSalary: employee.basicSalary },
+  });
+
+  return employee;
+}
+
 module.exports = {
   createEmployee,
   updateEmployee,
@@ -514,4 +538,6 @@ module.exports = {
   countByStatus,
   registerSummaryProvider,
   importEmployeesCsv,
+  updateBasicSalary,
 };
+

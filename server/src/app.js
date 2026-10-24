@@ -14,6 +14,7 @@ const auditRoutes = require('./modules/audit/routes');
 const employeeRoutes = require('./modules/employees/routes');
 const attendanceRoutes = require('./modules/attendance/routes');
 const leaveRoutes = require('./modules/leave/routes');
+const payrollRoutes = require('./modules/payroll/routes');
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave', leaveRoutes);
+app.use('/api/payroll', payrollRoutes);
+
 
 // 404 handler
 app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }));

@@ -16,7 +16,10 @@ import {
   Edit,
   ShieldCheck,
   ShieldAlert,
+  Lock,
+  Download,
 } from 'lucide-react';
+
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { Loader } from '../../components/shared/Loader';
@@ -415,18 +418,139 @@ export default function EmployeeDetailPage() {
         </div>
       )}
 
-      {/* Payroll Tab Placeholder */}
+      {/* Payroll Tab */}
       {activeTab === 'payroll' && (
-        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-            <CreditCard className="h-6 w-6" />
-          </div>
-          <h3 className="text-base font-semibold text-foreground">Payroll & Payslips</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-            Automated payslip generation, deductions, and payment histories will be available in Part 5.
-          </p>
+        <div className="space-y-6">
+          {summary?.payroll?.currentStructure || summary?.payroll?.lastPayslip ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Current Salary Structure */}
+              {summary?.payroll?.currentStructure && (
+                <div className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-primary" /> Active Salary Structure
+                    </h3>
+                  </div>
+                  <div className="space-y-3 text-xs divide-y divide-border/60">
+                    <div className="pt-2 flex justify-between font-mono">
+                      <span className="font-sans text-muted-foreground">Basic Monthly Salary</span>
+                      <span className="font-medium text-foreground">
+                        PKR {Number(summary.payroll.currentStructure.basic || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2 flex justify-between font-mono">
+                      <span className="font-sans text-muted-foreground">
+                        HRA ({summary.payroll.currentStructure.hraPercent}%)
+                      </span>
+                      <span className="text-foreground">
+                        PKR {((Number(summary.payroll.currentStructure.basic || 0) * Number(summary.payroll.currentStructure.hraPercent || 0)) / 100).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2 flex justify-between font-mono">
+                      <span className="font-sans text-muted-foreground">
+                        Medical ({summary.payroll.currentStructure.medicalPercent}%)
+                      </span>
+                      <span className="text-foreground">
+                        PKR {((Number(summary.payroll.currentStructure.basic || 0) * Number(summary.payroll.currentStructure.medicalPercent || 0)) / 100).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2 flex justify-between font-mono">
+                      <span className="font-sans text-muted-foreground">Other Allowance</span>
+                      <span className="text-foreground">
+                        PKR {Number(summary.payroll.currentStructure.otherAllowance || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2.5 flex justify-between items-center font-bold">
+                      <span className="font-sans text-muted-foreground">Total Monthly Gross</span>
+                      <span className="font-mono text-primary text-sm">
+                        PKR {Number(summary.payroll.currentStructure.gross || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Latest Finalized Payslip */}
+              {summary?.payroll?.lastPayslip ? (
+                <div className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-emerald-500" /> Latest Finalized Payslip
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                      <Lock className="h-3 w-3" />
+                      {summary.payroll.lastPayslip.month}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 text-xs divide-y divide-border/60 font-mono">
+                    <div className="pt-2 flex justify-between">
+                      <span className="font-sans text-muted-foreground">Earned Gross</span>
+                      <span className="text-foreground">
+                        PKR {Number(summary.payroll.lastPayslip.earnedGross || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2 flex justify-between">
+                      <span className="font-sans text-muted-foreground">
+                        Deductions ({summary.payroll.lastPayslip.deductionDays} days)
+                      </span>
+                      <span className="text-amber-600">
+                        PKR {Number(summary.payroll.lastPayslip.deduction || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2 flex justify-between">
+                      <span className="font-sans text-muted-foreground">Income Tax</span>
+                      <span className="text-rose-600">
+                        PKR {Number(summary.payroll.lastPayslip.tax || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    <div className="pt-2.5 flex justify-between items-center font-bold">
+                      <span className="font-sans text-emerald-700 dark:text-emerald-400">Net Take-Home</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 text-sm">
+                        PKR {Number(summary.payroll.lastPayslip.netPay || 0).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await api.get(`/payroll/payslips/${summary.payroll.lastPayslip._id}/pdf`, { responseType: 'blob' });
+                          const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `payslip-${summary.payroll.lastPayslip.month}-${employee.employeeCode}.pdf`);
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                        } catch (err) {
+                          alert('Failed to download PDF: ' + err.message);
+                        }
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Download Latest Payslip (PDF)
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border bg-card/40 p-6 text-center text-muted-foreground text-xs flex flex-col items-center justify-center">
+                  <CreditCard className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                  <p>No finalized payslips generated for this employee yet.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center text-muted-foreground text-xs">
+              No payroll profile or payslips available for this employee.
+            </div>
+          )}
         </div>
       )}
+
 
       {/* Edit modal */}
       {isHr && (

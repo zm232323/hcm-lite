@@ -486,6 +486,37 @@ async function getLeaveSummary({ from, to, departmentId = null }) {
   };
 }
 
+/**
+ * Reusable export: Approved leave days split by leave type (paid vs unpaid) inside a date range (Part 4 allowed addition).
+ */
+async function getApprovedLeaveDaysByType(employeeId, from, to) {
+  const leaves = await LeaveRequest.find({
+    employeeId,
+    status: 'approved',
+    startDate: { $lte: to },
+    endDate: { $gte: from },
+  })
+    .populate('leaveTypeId', 'name isPaid')
+    .lean();
+
+  const results = [];
+  for (const l of leaves) {
+    const rangeStart = l.startDate < from ? from : l.startDate;
+    const rangeEnd = l.endDate > to ? to : l.endDate;
+    const { workingDays } = await calculateWorkingDays(rangeStart, rangeEnd);
+    if (workingDays > 0) {
+      results.push({
+        leaveTypeId: l.leaveTypeId?._id,
+        name: l.leaveTypeId?.name,
+        isPaid: !!l.leaveTypeId?.isPaid,
+        days: workingDays,
+      });
+    }
+  }
+
+  return results;
+}
+
 // Register with Employee 360 summary provider
 registerSummaryProvider('leave', async (employeeId) => {
   const balances = await getLeaveBalance(employeeId);
@@ -508,6 +539,8 @@ module.exports = {
   listAllLeaves,
   hasApprovedLeave,
   getApprovedLeaveDays,
+  getApprovedLeaveDaysByType,
   getWhoIsOnLeave,
   getLeaveSummary,
 };
+

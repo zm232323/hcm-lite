@@ -10,6 +10,9 @@ const Employee = require('./Employee');
 const Attendance = require('./Attendance');
 const AttendanceCorrection = require('./AttendanceCorrection');
 const LeaveRequest = require('./LeaveRequest');
+const SalaryStructure = require('./SalaryStructure');
+const PayrollRun = require('./PayrollRun');
+const Payslip = require('./Payslip');
 
 module.exports = {
   User,
@@ -23,4 +26,8 @@ module.exports = {
   Attendance,
   AttendanceCorrection,
   LeaveRequest,
+  SalaryStructure,
+  PayrollRun,
+  Payslip,
 };
+

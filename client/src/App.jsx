@@ -25,6 +25,10 @@ import AttendanceBoardPage from './features/attendance/AttendanceBoardPage';
 import AttendanceCorrectionsPage from './features/attendance/AttendanceCorrectionsPage';
 import MyLeavesPage from './features/leave/MyLeavesPage';
 import LeaveApprovalsPage from './features/leave/LeaveApprovalsPage';
+import SalaryStructuresPage from './features/payroll/SalaryStructuresPage';
+import PayrollRunsPage from './features/payroll/PayrollRunsPage';
+import MyPayslipsPage from './features/payroll/MyPayslipsPage';
+
 
 import api from './lib/api';
 
@@ -205,6 +209,40 @@ function AppRoutes() {
         element={
           <ProtectedRoute roles={['admin', 'hr']}>
             <AppShell><LeaveApprovalsPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Payroll routes */}
+      <Route
+        path="/payroll/salary"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <AppShell><SalaryStructuresPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payroll/runs"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <AppShell><PayrollRunsPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payroll"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <Navigate to="/payroll/runs" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payroll/my"
+        element={
+          <ProtectedRoute roles={['employee']}>
+            <AppShell><MyPayslipsPage /></AppShell>
           </ProtectedRoute>
         }
       />

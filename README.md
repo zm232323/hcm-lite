@@ -300,11 +300,80 @@ Part 3 implements server-authoritative time attendance and quota-managed leave w
   - Returns `[{ leaveTypeId, name, isPaid, quota, used, pending, remaining }]`
 - `getApprovedLeaveDays(employeeId, from, to)` &rarr; `Promise<number>`
   - Returns sum of approved working days in range
+- `getApprovedLeaveDaysByType(employeeId, from, to)` &rarr; `Promise<Array<Object>>` (Part 4 allowed addition)
+  - Returns `[{ leaveTypeId, name, isPaid, days }]` split by leave type inside a date range
 - `hasApprovedLeave(employeeId, dateStr)` &rarr; `Promise<boolean>`
   - Returns `true` if employee has an approved leave request on `dateStr`
 - `getLeaveSummary({ from, to, departmentId? })` &rarr; `Promise<Object>`
   - Returns `{ totalApprovedDays, pendingRequestsCount, byType }`
 - `getWhoIsOnLeave(dateStr)` &rarr; `Promise<Array<Object>>`
   - Returns `[{ employee, leaveType, days, startDate, endDate }]`
+
+---
+
+## Part 4 — Payroll Lite
+
+### Overview
+Part 4 introduces automated salary structuring, proration for mid-month joiners and leavers, attendance/leave deductions, progressive annual tax slab calculations, draft-to-finalized locking workflows, employee payslip downloads (streamed in-memory PDF), and summary providers for Employee 360.
+
+### Exported Service Functions (Contract for Parts 5, 6)
+
+#### From `server/src/modules/payroll/service.js`:
+- `getPayrollSummary({ month?, from?, to?, departmentId?, includeDraft = false })` &rarr; `Promise<Object>`
+  - Returns `{ overall: { gross, deductions, tax, net, count }, byMonth: { [month]: ... }, byDepartment: { [dept]: ... } }`
+  - Only includes finalized runs unless `includeDraft: true`.
+- `getAverageSalary({ departmentId?, designationId? })` &rarr; `Promise<number>`
+  - Returns mean gross salary of active and probation employees based on salary structures.
+- `getLastPayslip(employeeId)` &rarr; `Promise<Object|null>`
+  - Returns the most recent finalized `Payslip` document snapshot for an employee.
+- `getPayrollCostThisYear()` &rarr; `Promise<Object>`
+  - Returns `{ year, totalGross, totalNet, runsCount }` for all finalized runs in the current calendar year.
+- `computeGross(basic, hraPercent = 40, medicalPercent = 10, otherAllowance = 0)` &rarr; `number`
+  - Helper to compute gross from components.
+
+#### From `server/src/modules/payroll/tax.js`:
+- `calculateAnnualTax(annualGross)` &rarr; `number`
+  - Pure function computing progressive tax on annual taxable gross based on illustrative slabs.
+- `calculateMonthlyTax(monthlyGross, eligibleDays, workingDays)` &rarr; `number`
+  - Monthly tax proration: `round2((annualTax / 12) * (eligibleDays / workingDays))`.
+
+#### Allowed Module Additions:
+- `updateBasicSalary(employeeId, basic, actor)` in `server/src/modules/employees/service.js` &rarr; updates `Employee.basicSalary`, writes an audit log entry, and returns the updated employee.
+- `getApprovedLeaveDaysByType(employeeId, from, to)` in `server/src/modules/leave/service.js` &rarr; returns approved working days per leave type with `isPaid` flag.
+
+### Exact Formulas Used
+1. **Salary Structure**:
+   - `HRA = round2(basic * (hraPercent / 100))` (default `hraPercent = 40`)
+   - `Medical = round2(basic * (medicalPercent / 100))` (default `medicalPercent = 10`)
+   - `Gross = round2(basic + HRA + Medical + otherAllowance)` (by default, `Gross = 1.5 * basic`)
+2. **Working Days & Proration**:
+   - `workingDays = countWorkingDays(monthStart, monthEnd)` (skipping weekends & holidays)
+   - `eligibleDays = countWorkingDays(max(monthStart, joiningDate), min(monthEnd, exitDate || monthEnd))`
+   - `perDay = round2(gross / workingDays)`
+   - `earnedGross = (eligibleDays === workingDays) ? gross : round2(perDay * eligibleDays)`
+3. **Deductions Inside Eligible Range**:
+   - `deductionDays = round2(absentDays + unpaidLeaveDays + 0.5 * halfDays)`
+     - `absentDays`: working days strictly before today in `Asia/Karachi` with no attendance record and no approved leave.
+     - `unpaidLeaveDays`: approved leave days with `isPaid === false`.
+     - `halfDays`: attendance records with `status === 'half_day'`.
+     - Late and missing_checkout are NOT deducted.
+   - `deduction = round2(perDay * deductionDays)`
+4. **Income Tax (Annual Slabs on `annualGross = gross * 12`)**:
+   - Up to 600,000 &rarr; `0`
+   - 600,001 to 1,200,000 &rarr; `5% of excess over 600,000`
+   - 1,200,001 to 2,400,000 &rarr; `30,000 + 15% of excess over 1,200,000`
+   - 2,400,001 to 3,600,000 &rarr; `210,000 + 25% of excess over 2,400,000`
+   - Above 3,600,000 &rarr; `510,000 + 35% of excess over 3,600,000`
+   - `monthlyTax = round2((annualTax / 12) * (eligibleDays / workingDays))`
+5. **Net Pay**:
+   - `netPay = round2(Math.max(0, earnedGross - deduction - monthlyTax))`
+
+### Assumptions
+- All calendar math and timezone operations are anchored strictly to `Asia/Karachi` via `utils/time.js`.
+- For full months with no proration (`eligibleDays === workingDays`), `earnedGross` equals `gross` exactly to prevent rounding discrepancies.
+- Today and future days are never counted as absent when running the current month mid-month.
+- Payslips store an immutable, full snapshot of calculations so subsequent employee or salary structure updates never modify historic finalized payslips.
+- PDF generation is streamed on the fly via `pdfkit` and never persisted to the filesystem.
+
 
 

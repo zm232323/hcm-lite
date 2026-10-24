@@ -2,8 +2,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Settings, Building2, Briefcase, CalendarDays, Calendar,
-  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User, CalendarClock,
+  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User, CalendarClock, CreditCard,
 } from 'lucide-react';
+
 import { cn } from '../../lib/utils';
 
 const adminLinks = [
@@ -20,7 +21,8 @@ const adminLinks = [
   { divider: true, label: 'Operations' },
   { to: '/attendance/board', label: 'Attendance Board', icon: Clock },
   { to: '/leave/approvals', label: 'Leave Requests', icon: FileText },
-  { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
+  { to: '/payroll/salary', label: 'Salary structures', icon: DollarSign },
+  { to: '/payroll/runs', label: 'Payroll', icon: CreditCard },
   { divider: true, label: 'Admin' },
   { to: '/audit', label: 'Audit Log', icon: ClipboardList },
   { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
@@ -39,7 +41,8 @@ const hrLinks = [
   { to: '/attendance/board', label: 'Attendance Board', icon: Clock },
   { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
   { to: '/leave/approvals', label: 'Leave Approvals', icon: FileText },
-  { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
+  { to: '/payroll/salary', label: 'Salary structures', icon: DollarSign },
+  { to: '/payroll/runs', label: 'Payroll', icon: CreditCard },
   { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
 ];
 
@@ -50,8 +53,9 @@ const employeeLinks = [
   { to: '/attendance/my', label: 'My Attendance', icon: Clock },
   { to: '/leave/my', label: 'Leave', icon: FileText },
   { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
-  { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
+  { to: '/payroll/my', label: 'My payslips', icon: DollarSign },
 ];
+
 
 function getLinksByRole(role) {
   if (role === 'admin') return adminLinks;
