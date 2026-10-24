@@ -28,7 +28,8 @@ import LeaveApprovalsPage from './features/leave/LeaveApprovalsPage';
 import SalaryStructuresPage from './features/payroll/SalaryStructuresPage';
 import PayrollRunsPage from './features/payroll/PayrollRunsPage';
 import MyPayslipsPage from './features/payroll/MyPayslipsPage';
-
+import AnnouncementsPage from './features/announcements/AnnouncementsPage';
+import NotificationsPage from './features/notifications/NotificationsPage';
 
 import api from './lib/api';
 
@@ -243,6 +244,24 @@ function AppRoutes() {
         element={
           <ProtectedRoute roles={['employee']}>
             <AppShell><MyPayslipsPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Communications */}
+      <Route
+        path="/announcements"
+        element={
+          <ProtectedRoute>
+            <AppShell><AnnouncementsPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <AppShell><NotificationsPage /></AppShell>
           </ProtectedRoute>
         }
       />

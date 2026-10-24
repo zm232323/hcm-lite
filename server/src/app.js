@@ -15,6 +15,9 @@ const employeeRoutes = require('./modules/employees/routes');
 const attendanceRoutes = require('./modules/attendance/routes');
 const leaveRoutes = require('./modules/leave/routes');
 const payrollRoutes = require('./modules/payroll/routes');
+const notificationsRoutes = require('./modules/notifications/routes');
+const announcementsRoutes = require('./modules/announcements/routes');
+const dashboardRoutes = require('./modules/dashboards/routes');
 
 const app = express();
 
@@ -37,6 +40,10 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/leave', leaveRoutes);
 app.use('/api/payroll', payrollRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/announcements', announcementsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
 
 
 // 404 handler

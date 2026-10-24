@@ -1,5 +1,6 @@
 'use strict';
-const { LeaveRequest, LeaveType, Holiday, Settings, Employee } = require('../../models');
+const { LeaveRequest, LeaveType, Holiday, Settings, Employee, User } = require('../../models');
+
 const { validation, conflict, notFound, forbidden } = require('../../utils/httpError');
 const { logAction } = require('../../utils/audit');
 const { notify } = require('../../utils/notify');
@@ -209,10 +210,28 @@ async function applyLeave(employeeId, data, actor) {
     after: { employeeId, leaveTypeId, startDate, endDate, days: workingDays },
   });
 
+  // Notify active HR users
+  try {
+    const hrUsers = await User.find({ role: 'hr', isActive: true }).select('_id');
+    const empDoc = await Employee.findById(employeeId).select('name employeeCode');
+    const empName = empDoc ? `${empDoc.name} (${empDoc.employeeCode})` : 'An employee';
+    for (const hr of hrUsers) {
+      notify(
+        hr._id,
+        'NEW_LEAVE_REQUEST',
+        `New leave request from ${empName} for ${workingDays} day(s) (${startDate} to ${endDate})`,
+        '/leave/approvals'
+      );
+    }
+  } catch (err) {
+    console.error('[Notify HR error]:', err.message);
+  }
+
   return LeaveRequest.findById(request._id)
     .populate('leaveTypeId', 'name isPaid yearlyQuota')
     .populate('employeeId', 'name employeeCode');
 }
+
 
 /**
  * Employee cancels own leave request.

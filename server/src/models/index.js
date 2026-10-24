@@ -13,6 +13,8 @@ const LeaveRequest = require('./LeaveRequest');
 const SalaryStructure = require('./SalaryStructure');
 const PayrollRun = require('./PayrollRun');
 const Payslip = require('./Payslip');
+const Notification = require('./Notification');
+const Announcement = require('./Announcement');
 
 module.exports = {
   User,
@@ -29,5 +31,8 @@ module.exports = {
   SalaryStructure,
   PayrollRun,
   Payslip,
+  Notification,
+  Announcement,
 };
+
 

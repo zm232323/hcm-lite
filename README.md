@@ -375,5 +375,78 @@ Part 4 introduces automated salary structuring, proration for mid-month joiners 
 - Payslips store an immutable, full snapshot of calculations so subsequent employee or salary structure updates never modify historic finalized payslips.
 - PDF generation is streamed on the fly via `pdfkit` and never persisted to the filesystem.
 
+---
+
+## Part 5 — Dashboards, Announcements, Notifications
+
+### Overview
+Part 5 delivers dedicated, role-specific real-time dashboards for Admin, HR, and Employee roles, full-featured company announcements with pinning, and asynchronous system-wide notification dispatch. The system remains strictly dynamic with zero seeded dummy data: all figures, charts, and metrics are computed on the fly from actual database records adhering to Part 3 and Part 4 contracts.
+
+### Exported Service Functions (Contract for Part 6 AI Assistant)
+
+#### From `server/src/modules/dashboards/service.js`:
+- `getDashboardData(role, query = {}, userId = null)` &rarr; `Promise<Object>`
+  - Universal dispatcher routing to role-specific dashboard generators.
+- `getHrDashboard(query = {})` &rarr; `Promise<Object>`
+  - Returns `{ kpis: { headcount, presentToday, onLeaveToday, lateToday, pendingApprovals, attendanceRate, latePercent }, attendanceTrend, absenteeismByDepartment, leaveByType, topLateComers }`.
+- `getAdminDashboard(query = {})` &rarr; `Promise<Object>`
+  - Returns `{ kpis: { headcount, attritionYTD, payrollCostGross, payrollCostNet, payrollCostYtdGross, payrollCostYtdNet, averageSalary }, headcountByDepartment, payrollCostByDepartment, genderBreakdown, tenureBreakdown, recentAuditLogs }`.
+- `getEmployeeDashboard(userId)` &rarr; `Promise<Object>`
+  - Returns `{ employee, todayAttendance, hoursThisWeek, lateCountMonth, leaveBalances, lastPayslip }`.
+
+#### From `server/src/utils/notify.js`:
+- `notify(userId, type, message, link = null)` &rarr; `Promise<Notification|null>`
+  - Persistent, fault-tolerant notification creation. Dispatches alerts on announcements, leave approvals/rejections, attendance corrections, and payroll events without interrupting callers.
+
+### Exact Metric Formulas Used
+1. **Headcount**:
+   - Employees with status `active` or `probation` on the end date `to` (`joiningDate <= to && (exitDate == null || exitDate > to)`).
+2. **Attrition Rate (YTD / Period %)**:
+   - `exits = count(exitDate >= from && exitDate <= to)`
+   - `averageHeadcount = (startHeadcount + endHeadcount) / 2`
+   - `attritionRate = averageHeadcount > 0 ? (exits / averageHeadcount) * 100 : null`
+3. **Attendance Rate %**:
+   - `working-day records = workingDaysInRange * activeHeadcount`
+   - `attendanceRate = (present + late + missing_checkout + 0.5 * half_day) / (working-day records - on_leave days) * 100`
+   - Returns `null` if denominator is 0.
+4. **Late %**:
+   - `latePercent = (late / (present + late)) * 100`
+   - Returns `null` if `present + late === 0`.
+5. **Absenteeism % (per Department)**:
+   - `absentDays = unexcused past working days strictly before today without check-in and without approved leave`
+   - `expectedWorkingDays = pastWorkingDates * deptEmployees`
+   - `absenteeismRate = expectedWorkingDays > 0 ? (absentDays / expectedWorkingDays) * 100 : null`
+6. **Leave Utilization**:
+   - Sum of approved working days taken inside the selected date range grouped by `LeaveType`.
+7. **Payroll Costs & Average Salary**:
+   - Cost: Aggregated gross and net salary spend from finalized `PayrollRun` records.
+   - Average Salary: Mean gross salary of active/probation employees in the department or organization.
+
+### Manual Test Verification Checklist
+1. **Announcements**:
+   - Log in as Admin or HR and navigate to `/announcements`.
+   - Click "New Announcement", fill title and body, check "Pin this announcement", and publish.
+   - Verify pinned announcement appears pinned with amber badge at top of the list.
+   - Test pin toggle, edit title/body, and delete.
+2. **Notifications**:
+   - Verify that creating an announcement creates a notification for all active users.
+   - Inspect the Topbar bell: badge increments with unread count.
+   - Click the bell to open the dropdown; click an item to mark it read and navigate.
+   - Test "Mark all as read" in the dropdown and on `/notifications`.
+3. **HR Operations Dashboard**:
+   - Log in as HR and navigate to `/dashboard`.
+   - Test preset buttons: Today, This Week, This Month, This Year, and custom date range.
+   - Check Attendance Trend line chart, Absenteeism bar chart, Leave Breakdown, and Top 5 Late Comers table.
+4. **Admin Executive Dashboard**:
+   - Log in as Admin and navigate to `/dashboard`.
+   - Verify Headcount, Attrition YTD, Payroll Spend, Gender Diversity pie chart, and Latest Audit Logs.
+5. **Employee Portal Dashboard**:
+   - Log in as Employee and navigate to `/dashboard`.
+   - Check-in using `CheckInWidget`; verify live clock and stamping.
+   - Check weekly hours progress bar vs 40 hours target, leave balance cards, and latest payslip card.
+6. **Part 6 Preview Cards**:
+   - Verify that AI Summary / AI Briefing cards are present with "Coming in Part 6" badge and disabled buttons.
+
+
 
 

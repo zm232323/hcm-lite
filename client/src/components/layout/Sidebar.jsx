@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Settings, Building2, Briefcase, CalendarDays, Calendar,
   Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User, CalendarClock, CreditCard,
+  Megaphone, Bell,
 } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
@@ -23,6 +24,9 @@ const adminLinks = [
   { to: '/leave/approvals', label: 'Leave Requests', icon: FileText },
   { to: '/payroll/salary', label: 'Salary structures', icon: DollarSign },
   { to: '/payroll/runs', label: 'Payroll', icon: CreditCard },
+  { divider: true, label: 'Communications' },
+  { to: '/announcements', label: 'Announcements', icon: Megaphone },
+  { to: '/notifications', label: 'Notifications', icon: Bell },
   { divider: true, label: 'Admin' },
   { to: '/audit', label: 'Audit Log', icon: ClipboardList },
   { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
@@ -43,6 +47,9 @@ const hrLinks = [
   { to: '/leave/approvals', label: 'Leave Approvals', icon: FileText },
   { to: '/payroll/salary', label: 'Salary structures', icon: DollarSign },
   { to: '/payroll/runs', label: 'Payroll', icon: CreditCard },
+  { divider: true, label: 'Communications' },
+  { to: '/announcements', label: 'Announcements', icon: Megaphone },
+  { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
 ];
 
@@ -54,6 +61,9 @@ const employeeLinks = [
   { to: '/leave/my', label: 'Leave', icon: FileText },
   { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
   { to: '/payroll/my', label: 'My payslips', icon: DollarSign },
+  { divider: true, label: 'Communications' },
+  { to: '/announcements', label: 'Announcements', icon: Megaphone },
+  { to: '/notifications', label: 'Notifications', icon: Bell },
 ];
 
 

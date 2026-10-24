@@ -1,15 +1,30 @@
 'use strict';
+const Notification = require('../models/Notification');
 
 /**
- * Harmless notification stub for Part 3.
- * Part 5 will implement full notification dispatcher and real-time delivery.
+ * Dispatch and persist a notification to a specific user.
+ * Fault-tolerant: Never throws to prevent breaking calling transactions or workflows.
  *
  * @param {string|import('mongoose').Types.ObjectId} userId
- * @param {string} type e.g. 'LEAVE_DECISION', 'CORRECTION_DECISION'
- * @param {string} message Human readable notification text
+ * @param {string} type
+ * @param {string} message
+ * @param {string} [link=null]
  */
-function notify(userId, type, message) {
-  console.log(`[Notification STUB] to=${userId} type=${type}: ${message}`);
+async function notify(userId, type, message, link = null) {
+  try {
+    if (!userId) return null;
+    const notification = await Notification.create({
+      userId,
+      type,
+      message,
+      link: link || null,
+      isRead: false,
+    });
+    return notification;
+  } catch (err) {
+    console.error(`[Notify failed to=${userId} type=${type}]:`, err.message);
+    return null;
+  }
 }
 
 module.exports = { notify };

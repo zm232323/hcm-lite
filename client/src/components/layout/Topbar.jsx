@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Menu, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { NotificationBell } from '../../features/notifications/NotificationBell';
 
 export function Topbar({ onMenuClick, companyName }) {
   const { user, logout } = useAuth();
@@ -28,7 +29,10 @@ export function Topbar({ onMenuClick, companyName }) {
         </h1>
       </div>
 
-      <div className="relative">
+      <div className="flex items-center gap-2">
+        <NotificationBell />
+
+        <div className="relative">
         <button
           id="user-menu-toggle"
           onClick={() => setDropdownOpen((v) => !v)}
@@ -62,6 +66,7 @@ export function Topbar({ onMenuClick, companyName }) {
             </div>
           </>
         )}
+      </div>
       </div>
     </header>
   );

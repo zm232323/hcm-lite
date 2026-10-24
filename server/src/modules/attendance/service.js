@@ -5,7 +5,9 @@ const {
   Settings,
   Holiday,
   Employee,
+  User,
 } = require('../../models');
+
 const { hasApprovedLeave, getWhoIsOnLeave } = require('../leave/service');
 const { validation, conflict, notFound, forbidden } = require('../../utils/httpError');
 const { logAction } = require('../../utils/audit');
@@ -401,8 +403,26 @@ async function requestCorrection(employeeId, data, actor) {
     after: { employeeId, date: data.date },
   });
 
+  // Notify active HR users
+  try {
+    const hrUsers = await User.find({ role: 'hr', isActive: true }).select('_id');
+    const empDoc = await Employee.findById(employeeId).select('name employeeCode');
+    const empName = empDoc ? `${empDoc.name} (${empDoc.employeeCode})` : 'An employee';
+    for (const hr of hrUsers) {
+      notify(
+        hr._id,
+        'NEW_CORRECTION_REQUEST',
+        `New attendance correction request from ${empName} for ${data.date}`,
+        '/attendance/corrections'
+      );
+    }
+  } catch (err) {
+    console.error('[Notify HR error]:', err.message);
+  }
+
   return AttendanceCorrection.findById(correction._id).populate('employeeId', 'name employeeCode');
 }
+
 
 /**
  * List corrections (HR/Admin sees all, Employee sees own).
