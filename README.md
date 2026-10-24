@@ -14,7 +14,7 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
 ![Gemini](https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google&logoColor=white)
 
-**[🌐 Live Demo](https://YOUR-APP.vercel.app)** &nbsp;·&nbsp; **[📦 Repository](https://github.com/YOUR-USERNAME/hcm-lite)** &nbsp;·&nbsp; **[🎬 5-Minute Demo Script](#-5-minute-demo-script)**
+**🌐 Live Demo: Coming soon** &nbsp;·&nbsp; **[📦 Repository](https://github.com/YOUR-USERNAME/hcm-lite)** &nbsp;·&nbsp; **[🎬 5-Minute Demo Script](#-5-minute-demo-script)**
 
 </div>
 
@@ -23,13 +23,14 @@
 ## 📑 Table of Contents
 
 - [Overview](#-overview)
+- [Highlights](#-highlights)
 - [Features by Role](#-features-by-role)
 - [How It Works](#-how-it-works)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
-- [Deployment](#-deployment-free-tier)
+- [Deployment](#-deployment)
 - [AI Assistant](#-ai-assistant)
 - [Business Rules](#-business-rules)
 - [Security](#-security)
@@ -37,6 +38,7 @@
 - [Testing](#-testing)
 - [5-Minute Demo Script](#-5-minute-demo-script)
 - [Done / Not Done](#-done--not-done)
+- [Roadmap](#-roadmap)
 - [Judges' Verification Prompts](#-judges-verification-prompts)
 
 ---
@@ -54,6 +56,21 @@
 | 🔐 **Access control** | Enforced on the **server** for every request, never only in the UI |
 | 🤖 **AI** | Google Gemini with tool calling; the database is the only source of truth |
 | 🌍 **Timezone** | All dates and times are evaluated in **Asia/Karachi** |
+
+## 🌟 Highlights
+
+| | |
+|---|---|
+| 🧼 **Zero dummy data** | Starts empty. Every KPI, chart and AI answer comes from records created in the app |
+| 🔐 **Server-side RBAC** | Role and data scope are checked on every request. Hiding a button is never the only protection |
+| 🤖 **AI that cannot lie about numbers** | The assistant calls the same services as the dashboards, so both always agree |
+| 🗓️ **Smart leave** | Type a sentence, get a pre-filled leave form. You confirm, the AI never saves |
+| 💰 **Payroll you can trust** | Proration, deductions and tax slab, with an Admin-only finalize that locks the month |
+| 📒 **Full audit trail** | Append-only log with actor, action, entity and before/after data |
+| 🧯 **Fails gracefully** | If the AI is down or the key is missing, the rest of the app keeps working |
+| 📱 **Responsive** | Works from 375 px wide, with loading, empty and error states everywhere |
+
+---
 
 ---
 
@@ -129,8 +146,8 @@
 
 ```mermaid
 flowchart LR
-    U["👤 Admin / HR / Employee"] --> FE["⚛️ React + Vite<br/>Vercel"]
-    FE -- "REST + JWT" --> BE["🟢 Express API<br/>Render"]
+    U["👤 Admin / HR / Employee"] --> FE["⚛️ React + Vite<br/>Web App"]
+    FE -- "REST + JWT" --> BE["🟢 Express API<br/>Node.js"]
     BE --> DB[("🍃 MongoDB Atlas")]
     BE -- "tool calling<br/>key on server only" --> LLM["✨ Google Gemini"]
 ```
@@ -171,7 +188,8 @@ flowchart TD
 | **Client** | React 18, Vite 5, Tailwind CSS 3, React Router 6 |
 | **UI** | Radix UI primitives, Lucide icons, Recharts |
 | **HTTP** | Axios (auto token injection and 401 handling) |
-| **Hosting (free)** | MongoDB Atlas M0 · Render · Vercel |
+| **Database** | MongoDB (Atlas or local) |
+| **Hosting** | Coming soon |
 
 ---
 
@@ -269,63 +287,21 @@ After that, Admin creates HR logins, and HR registering an employee creates that
 | `COMPANY_NAME` | | Company name for env bootstrap (default `My Company`) |
 | `AI_API_KEY` | | Gemini API key. Read by the server only, never sent to the browser |
 | `AI_MODEL` | | Gemini model name (default `gemini-1.5-flash`). If it is unavailable for your account, copy a current model name from Google AI Studio |
-| `NODE_ENV` | | Set to `production` when deployed |
+| `NODE_ENV` | | Set to `production` to hide stack traces in error responses |
 
 ### Client (`client/.env`)
 
 | Variable | Required | Description |
 |---|:---:|---|
-| `VITE_API_URL` | ✅ | Backend base URL, e.g. `http://localhost:5000/api` or `https://your-api.onrender.com/api` |
+| `VITE_API_URL` | ✅ | Backend base URL, e.g. `http://localhost:5000/api` |
 
 > 🔒 Commit `.env.example` only. Never commit a real key, password or database URI.
 
 ---
 
-## ☁️ Deployment (free tier)
+## ☁️ Deployment
 
-<details>
-<summary><b>1️⃣ Database: MongoDB Atlas M0</b></summary>
-
-1. Create a free **M0** cluster at [cloud.mongodb.com](https://cloud.mongodb.com).
-2. **Database Access:** create a user (use a password without `@ : / ? #`).
-3. **Network Access:** allow `0.0.0.0/0` so the Render service can connect.
-4. Copy the connection string and add a database name, e.g. `.../hcm-lite-prod?retryWrites=true&w=majority`.
-
-The database and its collections are created automatically the first time the app writes data.
-
-</details>
-
-<details>
-<summary><b>2️⃣ Backend: Render</b></summary>
-
-1. **New → Web Service**, connect your GitHub repo.
-2. Settings:
-
-| Field | Value |
-|---|---|
-| Root Directory | `server` |
-| Build Command | `npm install` |
-| Start Command | `npm start` |
-| Instance Type | Free |
-
-3. Add the environment variables: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL` (your Vercel URL), `AI_API_KEY`, `NODE_ENV=production`.
-4. Do **not** set `ADMIN_EMAIL` / `ADMIN_PASSWORD` if you want the hosted app to start from the first-run setup page.
-5. Check `https://<your-service>.onrender.com/api/health`.
-
-> ⏱️ The Render free tier sleeps after 15 minutes of inactivity. The first request afterwards can take about a minute. Open the health URL shortly before a demo to wake it up.
-
-</details>
-
-<details>
-<summary><b>3️⃣ Frontend: Vercel</b></summary>
-
-1. Import the repo on [vercel.com](https://vercel.com).
-2. Root Directory: `client`. Framework: Vite.
-3. Add `VITE_API_URL` = `https://<your-service>.onrender.com/api`.
-4. `client/vercel.json` already handles SPA routing.
-5. Go back to Render and set `CLIENT_URL` to the final Vercel URL (no trailing slash).
-
-</details>
+> 🚧 **Coming soon.** A hosted version is not live yet. For now, please run the project locally using the steps in [Getting Started](#-getting-started).
 
 ---
 
@@ -601,6 +577,17 @@ Start from a **fresh install**.
 
 ---
 
+## 🛣️ Roadmap
+
+- [ ] Hosted live demo
+- [ ] CSV import with a dry-run error report
+- [ ] Camera attendance with face detection and office geofence
+- [ ] Attrition risk score and absence anomaly flags
+- [ ] Late penalty rule (3 lates = 0.5 day)
+- [ ] Dark mode and PWA support
+
+---
+
 ## 🧑‍⚖️ Judges' Verification Prompts
 
 | As | Prompt | Expected |
@@ -619,7 +606,7 @@ Start from a **fresh install**.
 
 <div align="center">
 
-**Built with ❤️ for the Saylani Hackathon**
+**Built with ❤️ by Zaid Malik for the Saylani Hackathon**
 
 *Saylani IT Training · Changing Lives, Building Careers, Shaping the Future*
 
