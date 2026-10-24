@@ -6,5 +6,6 @@ const Designation = require('./Designation');
 const LeaveType = require('./LeaveType');
 const Holiday = require('./Holiday');
 const AuditLog = require('./AuditLog');
+const Employee = require('./Employee');
 
-module.exports = { User, Settings, Department, Designation, LeaveType, Holiday, AuditLog };
+module.exports = { User, Settings, Department, Designation, LeaveType, Holiday, AuditLog, Employee };

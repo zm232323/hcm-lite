@@ -17,6 +17,9 @@ import LeaveTypesPage from './features/org/LeaveTypesPage';
 import HolidaysPage from './features/org/HolidaysPage';
 import HrUsersPage from './features/users/HrUsersPage';
 import AuditPage from './features/audit/AuditPage';
+import EmployeesPage from './features/employees/EmployeesPage';
+import EmployeeDetailPage from './features/employees/EmployeeDetailPage';
+import MyProfilePage from './features/employees/MyProfilePage';
 
 import api from './lib/api';
 
@@ -131,6 +134,30 @@ function AppRoutes() {
         element={
           <ProtectedRoute roles={['admin']}>
             <AppShell><AuditPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <AppShell><EmployeesPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees/me"
+        element={
+          <ProtectedRoute roles={['employee']}>
+            <AppShell><MyProfilePage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees/:id"
+        element={
+          <ProtectedRoute roles={['admin', 'hr', 'employee']}>
+            <AppShell><EmployeeDetailPage /></AppShell>
           </ProtectedRoute>
         }
       />

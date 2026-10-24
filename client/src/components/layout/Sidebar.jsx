@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Settings, Building2, Briefcase, CalendarDays, Calendar,
-  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X,
+  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -16,7 +16,7 @@ const adminLinks = [
   { to: '/holidays', label: 'Holidays', icon: Calendar },
   { divider: true, label: 'People' },
   { to: '/users', label: 'HR Users', icon: Users },
-  { to: '/employees', label: 'Employees', icon: ClipboardList, soon: true },
+  { to: '/employees', label: 'Employees', icon: ClipboardList },
   { divider: true, label: 'Operations' },
   { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
   { to: '/leave', label: 'Leave', icon: FileText, soon: true },
@@ -35,7 +35,7 @@ const hrLinks = [
   { to: '/leave-types', label: 'Leave Types', icon: CalendarDays },
   { to: '/holidays', label: 'Holidays', icon: Calendar },
   { divider: true, label: 'Operations' },
-  { to: '/employees', label: 'Employees', icon: ClipboardList, soon: true },
+  { to: '/employees', label: 'Employees', icon: ClipboardList },
   { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
   { to: '/leave', label: 'Leave', icon: FileText, soon: true },
   { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
@@ -44,6 +44,8 @@ const hrLinks = [
 
 const employeeLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/employees/me', label: 'My Profile', icon: User },
+  { divider: true, label: 'Operations' },
   { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
   { to: '/leave', label: 'Leave', icon: FileText, soon: true },
   { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },

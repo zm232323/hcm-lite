@@ -224,3 +224,32 @@ hcm-lite/
 - `mustChangePassword` flag is enforced server-side, not just in UI
 - Admin role cannot be created via API (`/api/users` always creates `hr` role)
 - Audit log is append-only (no update/delete routes; pre-save hook rejects updates)
+
+---
+
+## Part 2 — Employees
+
+Part 2 introduces the **Employee** domain, managing workforce records and their linked employee portal logins.
+
+### Endpoints
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/employees/export` | HR | Export matching employees as RFC 4180 CSV |
+| `POST` | `/api/employees/import?dryRun=true` | HR | CSV import with diagnostic validation dry-run |
+| `GET` | `/api/employees` | All | Directory list with search & filters (scopd to self for employee role) |
+| `POST` | `/api/employees` | HR | Register employee + linked User account (returns temp password once) |
+| `PATCH` | `/api/employees/me` | Employee | Update own contact information (phone and address only) |
+| `GET` | `/api/employees/:id` | All | Employee 360 profile with summary providers (self or Admin/HR only) |
+| `PUT` | `/api/employees/:id` | HR | Update details/status (exited status requires exitDate & deactivates login) |
+
+### Key Features
+1. **One-Flow Registration**: Atomic creation of both the Employee profile and linked User account (`mustChangePassword: true`), with cleanup rollback on failure so no orphan Users exist.
+2. **Strict RBAC & Scoping**:
+   - Admin & HR see full directory.
+   - Employee role calling `/api/employees` receives **only** their own record.
+   - `basicSalary` is protected and visible only to Admin, HR, or the employee viewing their own profile.
+3. **Account Deactivation on Exit**: Marking an employee as `exited` requires an `exitDate` and disables their portal login account (`isActive: false`).
+4. **Summary Provider Registry**: The employee service exposes `registerSummaryProvider(name, fn)` so Parts 3 (Attendance), 4 (Leave), and 5 (Payroll) can plug in without modifying the employee module.
+5. **Mobile Responsiveness**: The employees table automatically switches to a stacked card layout on mobile viewports (< 640px / 375px).
+
