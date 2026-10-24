@@ -253,3 +253,58 @@ Part 2 introduces the **Employee** domain, managing workforce records and their 
 4. **Summary Provider Registry**: The employee service exposes `registerSummaryProvider(name, fn)` so Parts 3 (Attendance), 4 (Leave), and 5 (Payroll) can plug in without modifying the employee module.
 5. **Mobile Responsiveness**: The employees table automatically switches to a stacked card layout on mobile viewports (< 640px / 375px).
 
+---
+
+## Part 3 — Attendance & Leave
+
+Part 3 implements server-authoritative time attendance and quota-managed leave workflows. All dates and times are evaluated in **Asia/Karachi** (UTC+5).
+
+### Attendance Endpoints
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/attendance/check-in` | Employee | Punch in with server timestamp; checks weekend, holiday, approved leave; computes `isLate` |
+| `POST` | `/api/attendance/check-out` | Employee | Punch out; computes worked hours; assigns `half_day` if < 5 hrs |
+| `GET` | `/api/attendance/me?month=YYYY-MM` | Employee | Monthly calendar with derived day statuses, times, and worked hours |
+| `GET` | `/api/attendance/board?date=YYYY-MM-DD` | HR, Admin | Workforce attendance board for all active employees on date |
+| `POST` | `/api/attendance/corrections` | Employee | Request punch time adjustment |
+| `GET` | `/api/attendance/corrections` | All | Corrections inbox (HR/Admin all; Employee own) |
+| `PATCH` | `/api/attendance/corrections/:id/decision` | HR | Approve/Reject correction (upserts attendance record & audits) |
+
+### Leave Endpoints
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/leave/preview` | Employee | Live preview of working days (skipping weekends & holidays) and quota check |
+| `GET` | `/api/leave/balance` | All | Per-type quota breakdown (`quota`, `used`, `pending`, `remaining`) |
+| `GET` | `/api/leave/my` | Employee | Own leave history and status |
+| `GET` | `/api/leave` | HR, Admin | All leave requests filterable by status and department |
+| `POST` | `/api/leave` | Employee | Submit leave request; rejects overlap (422) and over-balance (422) |
+| `PATCH` | `/api/leave/:id/cancel` | Employee | Cancel pending request or future approved leave |
+| `PATCH` | `/api/leave/:id/decision` | HR | Approve/Reject request (comment required on reject; notifies employee) |
+
+### Exported Service Functions (Contract for Parts 4, 5, 6)
+
+#### From `server/src/modules/attendance/service.js`:
+- `getDayStatus(employeeId, dateStr)` &rarr; `Promise<string>`
+  - Returns `'present' | 'late' | 'half_day' | 'absent' | 'on_leave' | 'weekend' | 'holiday' | 'missing_checkout' | 'scheduled'`
+- `getAttendanceSummary({ from, to, departmentId?, employeeId? })` &rarr; `Promise<Object>`
+  - Returns `{ present, late, half_day, absent, on_leave, missing_checkout, totalWorkedHours, expectedWorkingDays }`
+- `getLateComers({ from, to, departmentId?, limit? })` &rarr; `Promise<Array>`
+  - Returns array of late Attendance documents populated with employee details
+- `countWorkingDays(from, to)` &rarr; `Promise<number>`
+  - Counts days between `from` and `to` excluding weekends and holidays
+
+#### From `server/src/modules/leave/service.js`:
+- `getLeaveBalance(employeeId, year?)` &rarr; `Promise<Array<Object>>`
+  - Returns `[{ leaveTypeId, name, isPaid, quota, used, pending, remaining }]`
+- `getApprovedLeaveDays(employeeId, from, to)` &rarr; `Promise<number>`
+  - Returns sum of approved working days in range
+- `hasApprovedLeave(employeeId, dateStr)` &rarr; `Promise<boolean>`
+  - Returns `true` if employee has an approved leave request on `dateStr`
+- `getLeaveSummary({ from, to, departmentId? })` &rarr; `Promise<Object>`
+  - Returns `{ totalApprovedDays, pendingRequestsCount, byType }`
+- `getWhoIsOnLeave(dateStr)` &rarr; `Promise<Array<Object>>`
+  - Returns `[{ employee, leaveType, days, startDate, endDate }]`
+
+

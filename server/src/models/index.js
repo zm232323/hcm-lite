@@ -7,5 +7,20 @@ const LeaveType = require('./LeaveType');
 const Holiday = require('./Holiday');
 const AuditLog = require('./AuditLog');
 const Employee = require('./Employee');
+const Attendance = require('./Attendance');
+const AttendanceCorrection = require('./AttendanceCorrection');
+const LeaveRequest = require('./LeaveRequest');
 
-module.exports = { User, Settings, Department, Designation, LeaveType, Holiday, AuditLog, Employee };
+module.exports = {
+  User,
+  Settings,
+  Department,
+  Designation,
+  LeaveType,
+  Holiday,
+  AuditLog,
+  Employee,
+  Attendance,
+  AttendanceCorrection,
+  LeaveRequest,
+};

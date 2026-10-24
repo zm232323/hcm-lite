@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Settings, Building2, Briefcase, CalendarDays, Calendar,
-  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User,
+  Users, ClipboardList, Clock, FileText, DollarSign, Bot, X, User, CalendarClock,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -18,8 +18,8 @@ const adminLinks = [
   { to: '/users', label: 'HR Users', icon: Users },
   { to: '/employees', label: 'Employees', icon: ClipboardList },
   { divider: true, label: 'Operations' },
-  { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
-  { to: '/leave', label: 'Leave', icon: FileText, soon: true },
+  { to: '/attendance/board', label: 'Attendance Board', icon: Clock },
+  { to: '/leave/approvals', label: 'Leave Requests', icon: FileText },
   { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
   { divider: true, label: 'Admin' },
   { to: '/audit', label: 'Audit Log', icon: ClipboardList },
@@ -36,8 +36,9 @@ const hrLinks = [
   { to: '/holidays', label: 'Holidays', icon: Calendar },
   { divider: true, label: 'Operations' },
   { to: '/employees', label: 'Employees', icon: ClipboardList },
-  { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
-  { to: '/leave', label: 'Leave', icon: FileText, soon: true },
+  { to: '/attendance/board', label: 'Attendance Board', icon: Clock },
+  { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
+  { to: '/leave/approvals', label: 'Leave Approvals', icon: FileText },
   { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
   { to: '/ai', label: 'AI Assistant', icon: Bot, soon: true },
 ];
@@ -46,8 +47,9 @@ const employeeLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/employees/me', label: 'My Profile', icon: User },
   { divider: true, label: 'Operations' },
-  { to: '/attendance', label: 'Attendance', icon: Clock, soon: true },
-  { to: '/leave', label: 'Leave', icon: FileText, soon: true },
+  { to: '/attendance/my', label: 'My Attendance', icon: Clock },
+  { to: '/leave/my', label: 'Leave', icon: FileText },
+  { to: '/attendance/corrections', label: 'Corrections', icon: CalendarClock },
   { to: '/payroll', label: 'Payroll', icon: DollarSign, soon: true },
 ];
 

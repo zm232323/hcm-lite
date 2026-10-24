@@ -268,29 +268,150 @@ export default function EmployeeDetailPage() {
         </div>
       )}
 
-      {/* Attendance Tab Placeholder */}
+      {/* Attendance Tab — Live records from summary provider */}
       {activeTab === 'attendance' && (
-        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-            <Clock className="h-6 w-6" />
-          </div>
-          <h3 className="text-base font-semibold text-foreground">Attendance Records</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-            Attendance logging, geolocation verification, and punch records will be available in Part 3.
-          </p>
+        <div className="space-y-4">
+          {summary?.attendance?.summary ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">Present</span>
+                  <span className="text-base font-bold font-mono text-green-600 dark:text-green-400">
+                    {summary.attendance.summary.present}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">Late</span>
+                  <span className="text-base font-bold font-mono text-amber-600 dark:text-amber-400">
+                    {summary.attendance.summary.late}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">Half Day</span>
+                  <span className="text-base font-bold font-mono text-purple-600 dark:text-purple-400">
+                    {summary.attendance.summary.half_day}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">Absent</span>
+                  <span className="text-base font-bold font-mono text-destructive">
+                    {summary.attendance.summary.absent}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">On Leave</span>
+                  <span className="text-base font-bold font-mono text-blue-600 dark:text-blue-400">
+                    {summary.attendance.summary.on_leave}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-card p-3">
+                  <span className="text-[10px] text-muted-foreground block">Total Hours</span>
+                  <span className="text-base font-bold font-mono text-foreground">
+                    {(summary.attendance.summary.totalWorkedMinutes / 60).toFixed(1)}h
+                  </span>
+                </div>
+              </div>
+
+              {/* Attendance days list */}
+              <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-border bg-muted/40 font-semibold text-xs text-foreground">
+                  Current Month Punches ({summary.attendance.month})
+                </div>
+                <div className="max-h-80 overflow-y-auto divide-y divide-border/60 text-xs">
+                  {summary.attendance.days
+                    ?.filter((d) => d.status !== 'weekend' && d.status !== 'scheduled')
+                    .map((d) => (
+                      <div key={d.date} className="flex items-center justify-between p-3 hover:bg-muted/30">
+                        <div>
+                          <p className="font-medium text-foreground">{formatDate(d.date)}</p>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {d.checkInAt ? `In: ${new Date(d.checkInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'No punch in'}
+                            {d.checkOutAt ? ` &bull; Out: ${new Date(d.checkOutAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="capitalize font-semibold text-[11px] block">{d.status.replace('_', ' ')}</span>
+                          {d.workedMinutes > 0 && (
+                            <span className="text-[10px] font-mono text-muted-foreground">
+                              {Math.floor(d.workedMinutes / 60)}h {d.workedMinutes % 60}m
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center text-xs text-muted-foreground">
+              No attendance records available for this month.
+            </div>
+          )}
         </div>
       )}
 
-      {/* Leave Tab Placeholder */}
+      {/* Leave Tab — Live balances & recent leaves from summary provider */}
       {activeTab === 'leave' && (
-        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-            <FileText className="h-6 w-6" />
-          </div>
-          <h3 className="text-base font-semibold text-foreground">Leave Balances & Requests</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
-            Leave quotas, employee applications, and approval workflows will be available in Part 4.
-          </p>
+        <div className="space-y-4 text-xs">
+          {summary?.leave ? (
+            <>
+              {/* Balances grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {summary.leave.balances?.map((b) => (
+                  <div key={b.leaveTypeId} className="rounded-xl border border-border bg-card p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-foreground truncate">{b.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{b.isPaid ? 'Paid' : 'Unpaid'}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between pt-1 border-t border-border/50">
+                      <div>
+                        <span className="text-lg font-bold font-mono text-primary">
+                          {b.quota !== null ? b.remaining : '∞'}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground ml-1">
+                          {b.quota !== null ? `/ ${b.quota}d` : 'unlimited'}
+                        </span>
+                      </div>
+                      <div className="text-right text-[10px] font-mono text-muted-foreground">
+                        <div>Used: {b.used}d</div>
+                        <div>Pending: {b.pending}d</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recent applications */}
+              <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
+                <div className="p-4 border-b border-border bg-muted/40 font-semibold text-xs text-foreground">
+                  Recent Leave Applications
+                </div>
+                {summary.leave.recentLeaves?.length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground">No leave applications found.</div>
+                ) : (
+                  <div className="divide-y divide-border/60">
+                    {summary.leave.recentLeaves?.map((l) => (
+                      <div key={l._id} className="flex items-center justify-between p-3 hover:bg-muted/30">
+                        <div>
+                          <p className="font-semibold text-foreground">{l.leaveTypeId?.name}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatDate(l.startDate)} &rarr; {formatDate(l.endDate)} ({l.days} {l.days === 1 ? 'day' : 'days'})
+                          </p>
+                        </div>
+                        <span className="capitalize font-medium text-[11px] rounded-full px-2.5 py-0.5 bg-muted text-foreground">
+                          {l.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center text-muted-foreground">
+              No leave records found.
+            </div>
+          )}
         </div>
       )}
 

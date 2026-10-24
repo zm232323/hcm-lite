@@ -20,6 +20,11 @@ import AuditPage from './features/audit/AuditPage';
 import EmployeesPage from './features/employees/EmployeesPage';
 import EmployeeDetailPage from './features/employees/EmployeeDetailPage';
 import MyProfilePage from './features/employees/MyProfilePage';
+import MyAttendancePage from './features/attendance/MyAttendancePage';
+import AttendanceBoardPage from './features/attendance/AttendanceBoardPage';
+import AttendanceCorrectionsPage from './features/attendance/AttendanceCorrectionsPage';
+import MyLeavesPage from './features/leave/MyLeavesPage';
+import LeaveApprovalsPage from './features/leave/LeaveApprovalsPage';
 
 import api from './lib/api';
 
@@ -158,6 +163,48 @@ function AppRoutes() {
         element={
           <ProtectedRoute roles={['admin', 'hr', 'employee']}>
             <AppShell><EmployeeDetailPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Attendance & Leave routes */}
+      <Route
+        path="/attendance/my"
+        element={
+          <ProtectedRoute roles={['employee']}>
+            <AppShell><MyAttendancePage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance/board"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <AppShell><AttendanceBoardPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance/corrections"
+        element={
+          <ProtectedRoute roles={['admin', 'hr', 'employee']}>
+            <AppShell><AttendanceCorrectionsPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leave/my"
+        element={
+          <ProtectedRoute roles={['employee']}>
+            <AppShell><MyLeavesPage /></AppShell>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leave/approvals"
+        element={
+          <ProtectedRoute roles={['admin', 'hr']}>
+            <AppShell><LeaveApprovalsPage /></AppShell>
           </ProtectedRoute>
         }
       />
